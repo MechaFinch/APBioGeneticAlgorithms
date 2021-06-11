@@ -161,7 +161,7 @@ public class SimulationPanel extends JPanel implements ActionListener {
 				break;
 			
 			case "reset":
-				simulation.initPopulation();
+				simulation.reset();
 				break;
 			
 			default:

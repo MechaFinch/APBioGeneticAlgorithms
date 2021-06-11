@@ -10,6 +10,13 @@ import java.awt.Graphics2D;
 public abstract class GeneticsBase {
 	
 	/**
+	 * Reset the simulation
+	 */
+	public void reset() {
+		initPopulation();
+	}
+	
+	/**
 	 * Create initial population
 	 */
 	public abstract void initPopulation();

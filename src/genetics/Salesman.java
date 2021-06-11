@@ -67,17 +67,22 @@ public class Salesman extends GeneticsBase {
 		solutions = new ArrayList<>(numSolutions);
 		selectedSolutions = new ArrayList<>(numSolutions);
 		
-		numGenerations = 0;
-		gensSinceImprovement = 0;
-		totalGensSinceImprovement = 0;
-		newBests = 0;
-		bestFitness = 100000;
-		
 		this.numCities = numCities;
 		this.numSolutions = numSolutions;
 		this.elites = elites;
 		this.eliteProb = eliteProb;
 		this.mutProb = mutProb;
+		
+		reset();
+	}
+	
+	@Override
+	public void reset() {
+		numGenerations = 0;
+		gensSinceImprovement = 0;
+		totalGensSinceImprovement = 0;
+		newBests = 0;
+		bestFitness = 100000;
 		
 		generateCities();
 		initPopulation();
