@@ -24,6 +24,10 @@ public class Salesman extends GeneticsBase {
 	// Probability of a mutation
 	final double MUTATION_PROBABILITY = 0.1;
 	
+	// The standard deviation of a mutation is this multiplied by the number of cities
+	// Mutations swap a number of cities based on the absolute value of a gaussian distribution with said SD
+	final double MUTATION_SD_FACTOR = 0.25;
+	
 	
 	/*
 	 * CODE
@@ -34,10 +38,15 @@ public class Salesman extends GeneticsBase {
 	
 	int numSolutions,
 		numCities,
-		elites;
+		elites,
+		numGenerations,
+		gensSinceImprovement,
+		totalGensSinceImprovement,
+		newBests;
 	
 	double eliteProb,
-		   mutProb;
+		   mutProb,
+		   bestFitness;
 	
 	ArrayList<SalesmanSolution> solutions,
 								selectedSolutions;
@@ -57,6 +66,12 @@ public class Salesman extends GeneticsBase {
 		cities = new int[numCities][2];
 		solutions = new ArrayList<>(numSolutions);
 		selectedSolutions = new ArrayList<>(numSolutions);
+		
+		numGenerations = 0;
+		gensSinceImprovement = 0;
+		totalGensSinceImprovement = 0;
+		newBests = 0;
+		bestFitness = 100000;
 		
 		this.numCities = numCities;
 		this.numSolutions = numSolutions;
@@ -271,7 +286,7 @@ public class Salesman extends GeneticsBase {
 		// Swap mutation
 		for(int i = 0; i < solutions.size(); i++) {
 			if(rand.nextDouble() < MUTATION_PROBABILITY) {
-				int n = rand.nextInt(3) + 1;
+				int n = (int)(Math.ceil(Math.abs(rand.nextGaussian() * (numCities * MUTATION_SD_FACTOR)))) + 1;
 				
 				for(int j = 0; j < n; j++) {
 					int[] p = solutions.get(i).path;
@@ -318,6 +333,19 @@ public class Salesman extends GeneticsBase {
 		cross();
 		mutate();
 		generateFitness(); // we need fitness for our draw function so do that after a gen instead of before
+		
+		numGenerations++;
+		
+		// Track time between new bests
+		double thisBest = solutions.get(0).fitness;
+		
+		if(thisBest < bestFitness) {
+			newBests++;
+			totalGensSinceImprovement += gensSinceImprovement;
+			
+			gensSinceImprovement = 0;
+			bestFitness = thisBest;
+		} else gensSinceImprovement++;
 	}
 	
 	public void runGenerationParalel() {
@@ -325,6 +353,7 @@ public class Salesman extends GeneticsBase {
 		
 		// run the other 3 in parallel
 		
+		numGenerations++;
 	}
 
 	@Override
@@ -361,7 +390,12 @@ public class Salesman extends GeneticsBase {
 		}
 		
 		// display best fitness
-		g.drawString(String.format("%.2f", solutions.get(0).fitness), 0, 500);
+		g.setColor(Color.black);
+		g.drawString(String.format("%.2f", (newBests == 0 ? 0 : (double)(totalGensSinceImprovement) / newBests)), 5, APBioSimulation.HEIGHT - 25);
+		g.drawString(String.format("%d", gensSinceImprovement), 5, APBioSimulation.HEIGHT - 15);
+		g.drawString(String.format("%.2f", solutions.get(0).fitness), 5, APBioSimulation.HEIGHT - 5);
+		
+		g.drawString(String.format("%d", numGenerations), APBioSimulation.WIDTH - 75, APBioSimulation.HEIGHT - 5);
 	}
 
 }

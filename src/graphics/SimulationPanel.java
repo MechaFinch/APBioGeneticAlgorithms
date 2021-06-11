@@ -28,7 +28,7 @@ public class SimulationPanel extends JPanel implements ActionListener {
 			stepButton,
 			resetButton;
 	
-	boolean simulationRunning = false;
+	boolean simulationRunning;
 	
 	/**
 	 * constructor
@@ -44,11 +44,18 @@ public class SimulationPanel extends JPanel implements ActionListener {
 		 * of each line on the bottom of the screen and the second list is the x-coordinate on the
 		 * top of the screen. For the PointOptimizer, the first list is the x-coordinates of the
 		 * points and the second list is the y-coordinates. X and Y values range from 0-500
+		 * 
+		 * For Salesman, the first number is the number of cities, the second the number of 
+		 * individuals, the third the number of "elite" individuals per generation, which get a free
+		 * pass for having the best fitness, the fourth the probability an elite individual is
+		 * crossed rather than left alone, and the fifth the opacity of each line 
 		 */
 		
 		//simulation = new LinearOptimizer(400, new int[] {0, 100, 400, 500}, new int[] {100, 0, 500, 400});
 		//simulation = new PointOptimizer(1000, new int[] {150, 350, 250}, new int[] {300, 300, 200});
 		simulation = new Salesman(35, 60, 5, 0.5, 0.2);
+		
+		simulationRunning = false;
 		
 		// layout stuff to have column of controls on the left and sim on the right
 		setLayout(new GridBagLayout());
@@ -97,12 +104,14 @@ public class SimulationPanel extends JPanel implements ActionListener {
 		if(!APBioSimulation.REAL_TIME) {
 			new Thread(() -> {
 				long lastTime = System.currentTimeMillis(),
-					 frameRate = 12;
+					 frameRate = 15;
 				
 				while(true) {
 					// step
 					if(simulationRunning) {
-						simulation.runGeneration();
+						for(int i = 0; i < 1000; i++) {
+							simulation.runGeneration();
+						}
 					}
 					
 					// draw
@@ -110,7 +119,10 @@ public class SimulationPanel extends JPanel implements ActionListener {
 					
 					// wait
 					try {
-						long delta = (lastTime + (1000 / frameRate)) - System.currentTimeMillis();
+						long newTime = System.currentTimeMillis(),
+							 delta = (lastTime + (1000 / frameRate)) - newTime;
+						lastTime = newTime;
+						
 						if(delta > 0) {
 							Thread.sleep(delta);
 						}
